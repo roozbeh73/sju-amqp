@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1407911233245
+Build-Jdk: 1.7.0_60
+Built-By: eost
+Bundle-Description: Profiles shared by all Talend SE demos
+Bundle-ManifestVersion: 2
+Bundle-Name: se-demo :: rabbitmq
+Bundle-SymbolicName: com.talend.se.demo.rabbitmq
+Bundle-Version: 5.5.1.SNAPSHOT
+Created-By: Apache Maven Bundle Plugin
+Export-Package: com.talend.se.demo;version="5.5.1.SNAPSHOT",com.talend.s
+ e.demo.rabbitmq;version="5.5.1.SNAPSHOT";uses:="org.osgi.framework"
+Import-Package: org.osgi.framework;version="[1.6,2)",org.apache.camel.co
+ mponent.jms;version="[2.13,3)",org.apache.activemq.broker,org.apache.ac
+ tivemq.pool,org.springframework.beans.factory.config,org.apache.activem
+ q.security,org.apache.qpid.client;version="[0.28,1)",org.springframewor
+ k.scheduling.config,org.springframework.scheduling.concurrent,org.apach
+ e.activemq.spring,org.apache.activemq.camel.component;version="[5.10,6)
+ ",org.apache.activemq.jaas,org.springframework.scheduling.annotation,or
+ g.apache.activemq.xbean,org.apache.activemq,org.springframework.context
+Tool: Bnd-2.1.0.20130426-122213

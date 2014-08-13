@@ -1,0 +1,116 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.talend.se.demo</groupId>
+    <artifactId>rabbitmq</artifactId>
+    <packaging>bundle</packaging>
+
+    <parent>
+        <groupId>com.talend.se.demo</groupId>
+        <artifactId>demo-parent</artifactId>
+        <version>5.5.1-SNAPSHOT</version>
+        <relativePath>../demo-parent/pom.xml</relativePath>
+    </parent>
+
+    <name>se-demo :: rabbitmq</name>
+
+    <properties>
+        <qpid.version>0.28_1</qpid.version>
+    </properties>
+                	
+    <dependencies>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
+
+        <!-- this order with camel-cxf coming before camel-core seems to be
+        important.  The woodstox-core-asl artifact  needs to be 4.2.  A
+        different version is referenced by camel-parent.  But I thought that
+        would have been handled by the order of precedence in my own 
+        DependencyManagement section. I guess not.  -->
+
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-spring</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-test-spring</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-camel</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-rabbitmq</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-amqp</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.qpid</artifactId>
+            <version>${qpid.version}</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Import-Package>
+                            org.apache.activemq,
+                            org.apache.activemq.xbean,
+                            org.apache.activemq.spring,
+                            org.apache.activemq.broker,
+                            org.apache.activemq.security,
+                            org.apache.activemq.jaas,
+                            org.apache.activemq.pool,
+                            org.apache.activemq.camel.component,
+                            org.apache.camel.component.jms,
+                            org.apache.qpid.client,
+                            org.springframework.beans.factory.config,
+                            org.springframework.scheduling.config,
+                            org.springframework.scheduling.concurrent,
+                            org.springframework.scheduling.annotation,
+                            org.springframework.context,
+                            *
+                        </Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

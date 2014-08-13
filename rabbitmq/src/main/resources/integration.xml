@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"	
+       xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xmlns:camel="http://camel.apache.org/schema/spring"
+       xmlns:cxf="http://camel.apache.org/schema/cxf"
+       xmlns:prop="http://camel.apache.org/schema/placeholder"
+       xmlns:cxfcamel="http://cxf.apache.org/transports/camel"
+       xsi:schemaLocation="
+		http://www.springframework.org/schema/beans 
+			http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://cxf.apache.org/jaxws
+			http://cxf.apache.org/schemas/jaxws.xsd
+		http://www.springframework.org/schema/context
+			http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/util
+			http://www.springframework.org/schema/util/spring-util.xsd
+		http://activemq.apache.org/schema/core http://activemq.org/config/1.0/1.0.xsd
+		http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd 
+		http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
+                http://cxf.apache.org/transports/camel http://cxf.apache.org/transports/camel.xsd
+         ">
+
+    <!-- not supported until camel 2.14 -->
+    <!-- bean id="customConnectionFactory" class="com.rabbitmq.client.ConnectionFactory">
+        <property name="host" value="localhost" />
+        <property name="port" value="5672" />
+        <property name="username" value="tadmin" />
+        <property name="password" value="tadmin" />
+        <property name="virtualHost" value="/" />
+    </bean -->
+
+    <!-- start activemq configuration -->
+    <bean id="jmsConnectionFactory" 
+          class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="tcp://localhost:61616" />
+    </bean>
+
+    <bean id="pooledConnectionFactory" 
+          class="org.apache.activemq.pool.PooledConnectionFactory" init-method="start" destroy-method="stop">
+        <property name="maxConnections" value="5" />
+        <property name="connectionFactory" ref="jmsConnectionFactory" />
+    </bean>
+
+    <bean id="jmsConfig" 
+          class="org.apache.camel.component.jms.JmsConfiguration">
+        <property name="connectionFactory" ref="pooledConnectionFactory"/>
+        <property name="concurrentConsumers" value="20"/>
+    </bean>
+
+    <bean id="activemq" 
+          class="org.apache.activemq.camel.component.ActiveMQComponent">
+        <property name="configuration" ref="jmsConfig"/>
+    </bean>
+
+<!-- 
+"amqp://ritchiem:bob@temp/testHost?brokerlist='tcp://localhost:5672;tcp://fancyserver:3000/',failover='roundrobin'";
+"amqp://user:pass@clientid/virtualhost?brokerlist='tcp://host:1?option1=\'value\',option2=\'value\';vm://:3?option1=\'value\'',failover='method?option1=\'value\',option2='value''";
+-->
+    <bean id="amqp" class="org.apache.qpid.client.AMQConnectionFactory">
+        <constructor-arg value="amqp://tadmin:tadmin@myClientId/virtualhost?brokerlist='tcp://localhost:61617'"/>
+    </bean>
+
+    <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
+        <!-- camel:propertyPlaceholder id="properties" location="ref:propertySources"/ -->
+		
+        <!-- Global Error Handler -->
+        <!-- camel:errorHandler id="globalErrorHandler" type="DeadLetterChannel" deadLetterUri="direct:errorEndpoint"></camel:errorHandler -->
+		
+        <!-- activemq to rabbitmq -->
+        <route id="toRMQ">
+            <from uri="activemq:queue:toRMQ?concurrentConsumers=5" />
+            <to uri="log:toRMQ?showHeaders=true" />
+            <to uri="rabbitmq://localhost:5672/adsb?routingKey=A&amp;username=tadmin&amp;password=tadmin"/>
+        </route>
+
+        <!-- rabbitmq to activemq -->
+        <!-- route id="fromRMQ1">
+            <from uri="rabbitmq://localhost:5672/junk?queue=adsbQ1&amp;routingKey=A&amp;autoDelete=false&amp;username=tadmin&amp;password=tadmin"/>
+            <to uri="log:fromRMQ?showHeaders=true" />
+            <to uri="activemq:queue:fromRMQ" />
+        </route -->
+
+        <route id="fromActiveMQ_AMQP">
+            <from uri="amqp:queue:from_activemq_amqp"/>
+            <to uri="log:fromRMQ?showHeaders=true" />
+        </route>
+
+
+    </camelContext>
+		
+
+</beans>
