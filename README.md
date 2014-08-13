@@ -1,4 +1,4 @@
-sju-amqp AMQP Demo for SESAR Joint Undertaking
+AMQP Demo for SESAR Joint Undertaking
 ==============================================
 
 This example demonstrates integration options for SESAR and FAA infrastructure using AMQP protocols.
