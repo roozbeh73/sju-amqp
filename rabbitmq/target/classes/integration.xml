@@ -70,25 +70,27 @@
         <!-- Global Error Handler -->
         <!-- camel:errorHandler id="globalErrorHandler" type="DeadLetterChannel" deadLetterUri="direct:errorEndpoint"></camel:errorHandler -->
 		
-        <!-- activemq to rabbitmq -->
-        <route id="toRMQ">
-            <from uri="activemq:queue:toRMQ?concurrentConsumers=5" />
-            <to uri="log:toRMQ?showHeaders=true" />
+        <route id="SWIM_to_EuroControl">
+            <from uri="activemq:queue:swim_adsb?concurrentConsumers=5" />
+            <to uri="log:SWIM_to_EuroControl?showHeaders=true" />
             <to uri="rabbitmq://localhost:5672/adsb?routingKey=A&amp;username=tadmin&amp;password=tadmin"/>
         </route>
 
-        <!-- rabbitmq to activemq -->
-        <!-- route id="fromRMQ1">
+        <route id="EuroControl_to_SWIM">
             <from uri="rabbitmq://localhost:5672/junk?queue=adsbQ1&amp;routingKey=A&amp;autoDelete=false&amp;username=tadmin&amp;password=tadmin"/>
-            <to uri="log:fromRMQ?showHeaders=true" />
-            <to uri="activemq:queue:fromRMQ" />
-        </route -->
-
-        <route id="fromActiveMQ_AMQP">
-            <from uri="amqp:queue:from_activemq_amqp"/>
-            <to uri="log:fromRMQ?showHeaders=true" />
+            <to uri="log:EuroControl_to_SWIM?showHeaders=true" />
+            <to uri="activemq:queue:eurocontrol_adsb" />
         </route>
 
+        <route id="SWIM_AMQP_client">
+            <from uri="amqp:queue:swim_adsb_amqp"/>
+            <to uri="log:SWIM_AMQP_client?showHeaders=true" />
+        </route>
+
+        <route id="EuroControl_AMQP_client">
+            <from uri="rabbitmq://localhost:5672/junk?queue=adsbQ2&amp;routingKey=A&amp;autoDelete=false&amp;username=tadmin&amp;password=tadmin"/>
+            <to uri="log:EuroControl_AMQP_client?showHeaders=true" />
+        </route>
 
     </camelContext>
 		
