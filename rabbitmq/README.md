@@ -4,6 +4,13 @@
 
     mvn install
 
+## Run
+
+This will run from the commandline for a developer without deploying to an ESB
+runtime instance
+
+   camel:run
+
 ## Deploy
 
 From karaf commandline on the same machine a the build
