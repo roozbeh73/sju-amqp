@@ -52,20 +52,19 @@
         <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
         <build-helper-maven-plugin.version>1.8</build-helper-maven-plugin.version>
 
+        <module.name>${project.groupId}.${project.artifactId}</module.name>
+
         <!-- build properties -->
         <build-properties>${project.artifactId}.build.properties</build-properties>
 
         <!-- container properties -->
-        <container-properties>${container}Container.properties</container-properties>
+        <container-build-properties>${container}Container.build.properties</container-build-properties>
 
-        <!-- app properties -->
-        <app-properties>${project.artifactId}.properties</app-properties>
-
-        <!-- default runtime, overridden by platform profiles -->
+        <!-- default runtime container, overridden by platform profiles -->
         <container>spring</container>
         
-        <!-- default spring container xml config file -->
-        <containerConfig>container.xml</containerConfig>
+        <!-- default container xml config file, overridden by platform profiles -->
+        <containerConfig>springContainer.xml</containerConfig>
         
         <osgi.import.default.version>[$(version;==;$(@)),$(version;+;$(@)))</osgi.import.default.version>    
 
@@ -219,8 +218,8 @@
             </plugins>
         </pluginManagement>
         <filters>
-            <filter>${container-properties}</filter>
-            <filter>${app-properties}</filter>
+            <filter>${build-properties}</filter>
+            <filter>${container-build-properties}</filter>
         </filters>
         <resources>
             <resource>
@@ -228,6 +227,7 @@
                 <filtering>true</filtering>
                 <includes>
                     <include>**/*.properties</include>
+                    <include>**/*.cfg</include>
                 </includes>
             </resource>
             <resource>
@@ -235,6 +235,7 @@
                 <filtering>false</filtering>
                 <excludes>
                     <exclude>**/*.properties</exclude>
+                    <exclude>**/*.cfg</exclude>
                 </excludes>
             </resource>
         </resources>
@@ -244,6 +245,7 @@
                 <filtering>true</filtering>
                 <includes>
                     <include>**/*.properties</include>
+                    <include>**/*.cfg</include>
                 </includes>
             </testResource>
             <testResource>
@@ -251,6 +253,7 @@
                 <filtering>false</filtering>
                 <excludes>
                     <exclude>**/*.properties</exclude>
+                    <exclude>**/*.cfg</exclude>
                 </excludes>
             </testResource>
         </testResources>
@@ -317,6 +320,7 @@
                                     <filtering>true</filtering>
                                     <includes>
                                         <include>**/*.properties</include>
+                                        <include>**/*.cfg</include>
                                         <include>${project.artifactId}-features.xml</include>
                                     </includes>
                                 </resource>
@@ -333,7 +337,15 @@
                     <systemProperties>
                         <systemProperty>
                             <key>containerConfig</key>
-                            <value>container.xml</value>
+                            <value>springContainer.xml</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>container</key>
+                            <value>spring</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>module.name</key>
+                            <value>${module.name}</value>
                         </systemProperty>
                     </systemProperties>
                 </configuration>
@@ -342,10 +354,11 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <!-- unit tests are always us the spring config -->
+                    <!-- unit tests always uses the spring config -->
                     <systemPropertyVariables>
                         <container>${container}</container>
-                        <containerConfig>container.xml</containerConfig>
+                        <containerConfig>springContainer.xml</containerConfig>
+                        <module.name>${module.name}</module.name>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -414,7 +427,7 @@
             </activation>
             <properties>
                 <container>spring</container>
-                <containerConfig>container.xml</containerConfig>
+                <containerConfig>springContainer.xml</containerConfig>
             </properties>
             <build>
                 <plugins>
@@ -432,8 +445,7 @@
                                         <echo>##### Profile spring Loaded #####</echo>
                                         <echo>##### container=${container} #####</echo>
                                         <echo>##### build-properties=${build-properties} #####</echo>
-                                        <echo>##### container-properties=${container-properties} #####</echo>
-                                        <echo>##### app-properties=${app-properties} #####</echo>
+                                        <echo>##### container-build-properties=${container-build-properties} #####</echo>
                                         <echo>##### containerConfig=${containerConfig} #####</echo>
                                     </tasks>
                                 </configuration>
@@ -459,7 +471,7 @@
             </activation>
             <properties>
                 <container>jetty</container>
-                <containerConfig>container.xml</containerConfig>
+                <containerConfig>springContainer.xml</containerConfig>
             </properties>
             <build>
                 <plugins>
@@ -477,8 +489,7 @@
                                         <echo>##### Profile jetty Loaded #####</echo>
                                         <echo>##### container=${container} #####</echo>
                                         <echo>##### build-properties=${build-properties} #####</echo>
-                                        <echo>##### container-properties=${container-properties} #####</echo>
-                                        <echo>##### app-properties=${app-properties} #####</echo>
+                                        <echo>##### container-build-properties=${container-build-properties} #####</echo>
                                         <echo>##### containerConfig=${containerConfig} #####</echo>
                                     </tasks>
                                 </configuration>
@@ -498,12 +509,8 @@
                                     <value>${container}</value>
                                 </systemProperty>
                                 <systemProperty>
-                                    <key>app-properties</key>
-                                    <value>${app-properties}</value>
-                                </systemProperty>
-                                <systemProperty>
-                                    <key>container-properties</key>
-                                    <value>${container-properties}</value>
+                                    <key>container-build-properties</key>
+                                    <value>${container-build-properties}</value>
                                 </systemProperty>
                                 <systemProperty>
                                     <key>com.sun.management.jmxremote</key>
@@ -531,7 +538,7 @@
             </activation>
             <properties>
                 <container>tomcat</container>
-                <containerConfig>container.xml</containerConfig>
+                <containerConfig>springContainer.xml</containerConfig>
             </properties>
             <build>
                 <plugins>
@@ -573,8 +580,7 @@
                                         <echo>##### Profile tomcat Loaded #####</echo>
                                         <echo>##### container=${container} #####</echo>
                                         <echo>##### build-properties=${build-properties} #####</echo>
-                                        <echo>##### container-properties=${container-properties} #####</echo>
-                                        <echo>##### app-properties=${app-properties} #####</echo>
+                                        <echo>##### container-build-properties=${container-build-properties} #####</echo>
                                         <echo>##### containerConfig=${containerConfig} #####</echo>
                                     </tasks>
                                 </configuration>
@@ -588,8 +594,7 @@
                             <ignorePackaging>true</ignorePackaging>
                             <systemProperties>
                                 <container>${container}</container>
-                                <app-properties>${app-properties}</app-properties>
-                                <container-properties>${container-properties}</container-properties>
+                                <container-build-properties>${container-build-properties}</container-build-properties>
                             </systemProperties>
                         </configuration>
                     </plugin>
@@ -637,8 +642,7 @@
                                         <echo>##### Profile karaf Loaded #####</echo>
                                         <echo>##### container=${container} #####</echo>
                                         <echo>##### build-properties=${build-properties} #####</echo>
-                                        <echo>##### container-properties=${container-properties} #####</echo>
-                                        <echo>##### app-properties=${app-properties} #####</echo>
+                                        <echo>##### container-build-properties=${container-build-properties} #####</echo>
                                         <echo>##### containerConfig=${containerConfig} #####</echo>
                                     </tasks>
                                 </configuration>
@@ -667,6 +671,8 @@
                                                 <include>${project.artifactId}-features.xml</include>
                                                 <!-- filter applicationContext prior to packaging -->
                                                 <include>META-INF/spring/applicationContext.xml</include>
+                                                <!-- filter karafContainer prior to packaging -->
+                                                <include>karafContainer.xml</include>
                                             </includes>
                                         </resource>
                                     </resources>              
@@ -707,7 +713,7 @@
                         <artifactId>build-helper-maven-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>attach-artifacts</id>
+                                <id>attach-osgi-feature</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>attach-artifact</goal>
@@ -718,6 +724,22 @@
                                             <file>target/resources/${project.artifactId}-features.xml</file>
                                             <classifier>features</classifier>
                                             <type>xml</type>
+                                        </artifact>
+                                    </artifacts>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>attach-osgi-cfg</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>attach-artifact</goal>
+                                </goals>
+                                <configuration>
+                                    <artifacts>
+                                        <artifact>
+                                            <file>target/resources/${project.groupId}.${project.artifactId}.properties</file>
+                                            <classifier>osgi</classifier>
+                                            <type>cfg</type>
                                         </artifact>
                                     </artifacts>
                                 </configuration>

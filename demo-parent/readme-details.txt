@@ -1,4 +1,4 @@
-The demo-parent provides the folowing additional functionality:
+The demo-parent provides the following additional functionality:
 
 1.  Establish property file conventions.
 2.  Provides profiles for different target platforms: spring, tomcat, jetty, karaf
@@ -12,21 +12,28 @@ The goal is to be able to use only relative pathnames for all resources at
 runtime in a manner that is property driven and invariant across different
 platforms.
 
-Project properties are used only at build time.  It is located in the project
-root:
-   ${project.artifactId}.build.properties
+Project **build** properties used by maven are in the project root:
 
-Application specific properties are loaded from 
-   ${project.artifactId}.properties
-To
-   /src/main/resources/app.properties
+> ${project.artifactId}.build.properties
 
-Container specific properties are located in the project root directory and
-follow the convention of springContainer, tomcatContainer, etc.
-This is loaded from:
-   ${container}Container.properties
+These properties are available in the maven pom itself since they are loaded
+at the initialize phase by the properties-maven-plugin.
+
+Container specific build properties are located in the project root and follow
+the convention of springContainer, tomcatContainer, etc.
+
+> ${container}Container.build.properties
+
+These build properties are applied via maven filters to populate configuration
+property files in the resources directory, but they are _not_ loaded into the
+maven property space at the initialize phase.  They are strictly for creating
+configuration property files via maven filters.
+
+> /src/main/resources/${project.groupId}.${project.artifactId}.properties
+
 To
-   src/main/resources/${container}.properties
+
+> src/main/resources/${container}.properties
 
 The path to the container properties file will vary based on whether it is
 being referenced from maven at build time or from the application itself at
