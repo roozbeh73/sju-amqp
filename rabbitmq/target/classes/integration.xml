@@ -36,19 +36,19 @@
     <!-- start activemq configuration -->
     <bean id="jmsConnectionFactory" 
           class="org.apache.activemq.ActiveMQConnectionFactory">
-        <property name="brokerURL" value="tcp://localhost:61616" />
+        <property name="brokerURL" value="{{activemq.protocol}}://{{activemq.host}}:{{activemq.port}}" />
     </bean>
 
     <bean id="pooledConnectionFactory" 
           class="org.apache.activemq.pool.PooledConnectionFactory" init-method="start" destroy-method="stop">
-        <property name="maxConnections" value="5" />
+        <property name="maxConnections" value="{{activemq.maxConnections}}" />
         <property name="connectionFactory" ref="jmsConnectionFactory" />
     </bean>
 
     <bean id="jmsConfig" 
           class="org.apache.camel.component.jms.JmsConfiguration">
         <property name="connectionFactory" ref="pooledConnectionFactory"/>
-        <property name="concurrentConsumers" value="20"/>
+        <property name="concurrentConsumers" value="{{activemq.concurrentConsumers}}"/>
     </bean>
 
     <bean id="activemq" 
@@ -61,11 +61,11 @@
 "amqp://user:pass@clientid/virtualhost?brokerlist='tcp://host:1?option1=\'value\',option2=\'value\';vm://:3?option1=\'value\'',failover='method?option1=\'value\',option2='value''";
 -->
     <bean id="amqp" class="org.apache.qpid.client.AMQConnectionFactory">
-        <constructor-arg value="amqp://tadmin:tadmin@myClientId/virtualhost?brokerlist='tcp://localhost:61617'"/>
+        <constructor-arg value="amqp://tadmin:tadmin@myClientId/virtualhost?brokerlist='{{activemq.protocol}}://{{activemq.host}}:{{activemq.port}}'"/>
     </bean>
 
     <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
-        <!-- camel:propertyPlaceholder id="properties" location="ref:propertySources"/ -->
+        <camel:propertyPlaceholder id="properties" location="ref:propertySources"/>
 		
         <!-- Global Error Handler -->
         <!-- camel:errorHandler id="globalErrorHandler" type="DeadLetterChannel" deadLetterUri="direct:errorEndpoint"></camel:errorHandler -->
@@ -73,11 +73,11 @@
         <route id="SWIM_to_EuroControl">
             <from uri="activemq:queue:swim_adsb?concurrentConsumers=5" />
             <to uri="log:SWIM_to_EuroControl?showHeaders=true" />
-            <to uri="rabbitmq://localhost:5672/adsb?routingKey=A&amp;username=tadmin&amp;password=tadmin"/>
+            <to uri="{{rabbitmq.protocol}}://{{rabbitmq.host}}:{{rabbitmq.port}}/adsb?routingKey=A&amp;username=tadmin&amp;password=tadmin"/>
         </route>
 
         <route id="EuroControl_to_SWIM">
-            <from uri="rabbitmq://localhost:5672/junk?queue=adsbQ1&amp;routingKey=A&amp;autoDelete=false&amp;username=tadmin&amp;password=tadmin"/>
+            <from uri="{{rabbitmq.protocol}}://{{rabbitmq.host}}:{{rabbitmq.port}}/junk?queue=adsbQ1&amp;routingKey=A&amp;autoDelete=false&amp;username=tadmin&amp;password=tadmin"/>
             <to uri="log:EuroControl_to_SWIM?showHeaders=true" />
             <to uri="activemq:queue:eurocontrol_adsb" />
         </route>
@@ -88,10 +88,31 @@
         </route>
 
         <route id="EuroControl_AMQP_client">
-            <from uri="rabbitmq://localhost:5672/junk?queue=adsbQ2&amp;routingKey=A&amp;autoDelete=false&amp;username=tadmin&amp;password=tadmin"/>
+            <from uri="{{rabbitmq.protocol}}://{{rabbitmq.host}}:{{rabbitmq.port}}/junk?queue=adsbQ2&amp;routingKey=A&amp;autoDelete=false&amp;username=tadmin&amp;password=tadmin"/>
             <to uri="log:EuroControl_AMQP_client?showHeaders=true" />
         </route>
 
+        <route id="activemqMonitor.broker">
+            <from uri="timer:activemqMonitor.broker?period=10000" />
+            <inOut uri="activemq:queue:ActiveMQ.Statistics.Broker" />
+            <to uri="log:activemqMonitor.broker"/>
+        </route>
+
+        <route id="activemqMonitor.swim_adsb">
+            <from uri="timer:activemqMonitor.broker?period=5000" />
+            <inOut uri="activemq:queue:ActiveMQ.Statistics.Destination.swim_adsb" />
+            <to uri="log:activemqMonitor.swim_adsb"/>
+        </route>
+
+        <route id="adsbSource">
+            <from uri="timer:adsbSource?period=3000" />
+            <setBody>
+                <simple>fake adsb message</simple>
+            </setBody>
+            <inOut uri="activemq:queue:swim_adsb" />
+        </route>
+        
+                        
     </camelContext>
 		
 

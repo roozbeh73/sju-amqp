@@ -9,7 +9,12 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
 
-    <bean id="helloWorld" class="com.talend.se.demo.HelloWorld">
+    <bean id="propertyChecker1" class="com.talend.se.demo.PropertyChecker">
+        <constructor-arg value="{{module.name}}" />
+    </bean>
+
+    <bean id="propertyChecker2" class="com.talend.se.demo.PropertyChecker">
+        <constructor-arg value="{{activemq.uri}}" />
     </bean>
             
 </beans>

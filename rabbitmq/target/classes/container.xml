@@ -11,5 +11,51 @@
 		http://www.springframework.org/schema/util
 			http://www.springframework.org/schema/util/spring-util.xsd">
 
+    <util:properties id="defaultProperties">
+        <prop key="prop1">default-xml-1</prop>
+        <prop key="prop2">default-xml-2</prop>
+    </util:properties> 
+
+    <!-- load just system properties to allow dynamic specification of properties file via local.config System property -->
+    <bean id="systemPropertiesConfig"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="placeholderPrefix" value="##" />
+        <property name="placeholderSuffix" value="##" />
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+    </bean>
+
+    <bean id="optionalProperty" class="org.springframework.beans.factory.config.PropertiesFactoryBean" abstract="true">
+        <property name="ignoreResourceNotFound" value="true"/>
+    </bean>
+
+    <!-- centralize properties so for reference by both spring and camel property placeholders -->
+    <bean id="propertySources" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="propertiesArray">
+            <util:list>
+                <ref local="defaultProperties"/>
+                <ref local="appProperties"/>
+                <bean parent="optionalProperty">
+                    <property name="location" value="classpath:test.properties"/>
+                </bean>
+                <!-- local configuration by downstream developer -->
+                <bean parent="optionalProperty">
+                    <property name="location" value="##local.config##"/>
+                </bean>
+                <!-- externalized configuration in runtime environment by operations -->
+                <bean parent="optionalProperty">
+                    <property name="location" value="##external.config##"/>
+                </bean>
+            </util:list>
+        </property>
+    </bean>
+
+    <bean id="springPropertiesPlaceholder"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+        <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
+        <property name="placeholderPrefix" value="{{" />
+        <property name="placeholderSuffix" value="}}" />
+        <property name="properties" ref="propertySources"/>
+    </bean>
 
 </beans>

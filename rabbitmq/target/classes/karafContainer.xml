@@ -20,4 +20,10 @@
     ">
 
 
+    <osgix:cm-properties id="appProperties" persistent-id="com.talend.se.demo.rabbitmq">
+        <prop key="prop1">osgi-xml-1</prop>
+    </osgix:cm-properties>
+
+    <import resource="classpath:container.xml"/>
+    
 </beans>

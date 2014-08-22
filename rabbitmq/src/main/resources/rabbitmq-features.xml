@@ -16,21 +16,23 @@
 -->
 <features name="demo-${project.artifactId}-feature-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
 
-  <repository>mvn:org.apache.karaf.assemblies.features/standard/${karaf.version}/xml/features</repository>
-  <repository>mvn:org.apache.karaf.assemblies.features/enterprise/${karaf.version}/xml/features</repository>
-  <repository>mvn:org.apache.camel.karaf/apache-camel/${camel.version}/xml/features</repository>
+    <repository>mvn:org.apache.karaf.assemblies.features/standard/${karaf.version}/xml/features</repository>
+    <repository>mvn:org.apache.karaf.assemblies.features/enterprise/${karaf.version}/xml/features</repository>
+    <repository>mvn:org.apache.camel.karaf/apache-camel/${camel.version}/xml/features</repository>
     
-  <feature name='demo-${project.build.finalName}' version='${project.version}' resolver='(obr)'>
-    <feature version="${activemq.version}">activemq-client</feature>
-    <feature version="${activemq.version}">activemq-camel</feature>
-    <feature version="${camel.version}">camel-spring</feature>
-    <feature version="${camel.version}">camel-jms</feature>
-    <feature version="${camel.version}">camel-rabbitmq</feature>
-    <feature version="${camel.version}">camel-amqp</feature>
+    <feature name='demo-${project.build.finalName}' version='${project.version}' resolver='(obr)'>
+        <feature version="${activemq.version}">activemq-client</feature>
+        <feature version="${activemq.version}">activemq-camel</feature>
+        <feature version="${camel.version}">camel-spring</feature>
+        <feature version="${camel.version}">camel-jms</feature>
+        <feature version="${camel.version}">camel-rabbitmq</feature>
+        <feature version="${camel.version}">camel-amqp</feature>
 
-    <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.qpid/${qpid.version}</bundle> 
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.qpid/${qpid.version}</bundle> 
 
-    <bundle>mvn:${project.groupId}/${project.build.finalName}/${project.version}</bundle>
-  </feature>
+        <configfile finalname="etc/${project.groupId}.${project.artifactId}.cfg">mvn:${project.groupId}/${project.artifactId}/${project.version}/cfg/osgi</configfile>
+
+        <bundle>mvn:${project.groupId}/${project.build.finalName}/${project.version}</bundle>
+    </feature>
         
 </features>
